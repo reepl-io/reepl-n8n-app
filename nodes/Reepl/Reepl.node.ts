@@ -89,7 +89,7 @@ export class Reepl implements INodeType {
         const operation = REEPL_OPERATION_MAP[operationId];
 
         if (!operation) {
-          throw new NodeOperationError(node, `Unsupported operation: ${operationId}`);
+          throw new NodeOperationError(node, `Unsupported operation: ${operationId}`, { itemIndex });
         }
 
         const pathParams = parseJsonObject(this.getNodeParameter('pathParamsJson', itemIndex), 'pathParamsJson', itemIndex, node);
