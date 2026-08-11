@@ -7,7 +7,7 @@ import type {
   INodeTypeDescription,
   INodePropertyOptions,
 } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { REEPL_OPERATION_MAP, REEPL_OPERATIONS } from './operations';
 import { getBaseUrl, interpolatePath, parseJsonObject } from './helpers';
 
@@ -21,7 +21,10 @@ export class Reepl implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Reepl',
     name: 'reepl',
-    icon: 'file:reepl.svg',
+    icon: {
+      light: 'file:reepl.svg',
+      dark: 'file:reepl.dark.svg',
+    },
     group: ['transform'],
     version: 1,
     subtitle: '={{$parameter["operation"]}}',
@@ -29,8 +32,9 @@ export class Reepl implements INodeType {
     defaults: {
       name: 'Reepl',
     },
-    inputs: ['main'],
-    outputs: ['main'],
+    usableAsTool: true,
+    inputs: [NodeConnectionTypes.Main],
+    outputs: [NodeConnectionTypes.Main],
     credentials: [
       {
         name: 'reeplApi',
@@ -45,13 +49,13 @@ export class Reepl implements INodeType {
         options: operationOptions,
         default: 'getCurrentUser',
         required: true,
+        noDataExpression: true,
       },
       {
         displayName: 'Path Params (JSON)',
         name: 'pathParamsJson',
         type: 'json',
         default: '{}',
-        required: false,
         description: 'JSON object used to fill path placeholders like {postId}',
       },
       {
@@ -59,7 +63,6 @@ export class Reepl implements INodeType {
         name: 'queryJson',
         type: 'json',
         default: '{}',
-        required: false,
         description: 'JSON object used as query string parameters',
       },
       {
@@ -67,7 +70,6 @@ export class Reepl implements INodeType {
         name: 'bodyJson',
         type: 'json',
         default: '{}',
-        required: false,
         description: 'JSON request body for POST/PUT operations',
       },
     ],
@@ -77,6 +79,7 @@ export class Reepl implements INodeType {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
 
+    const node = this.getNode();
     const credentials = await this.getCredentials('reeplApi');
     const baseUrl = getBaseUrl(credentials);
 
@@ -86,14 +89,14 @@ export class Reepl implements INodeType {
         const operation = REEPL_OPERATION_MAP[operationId];
 
         if (!operation) {
-          throw new Error(`Unsupported operation: ${operationId}`);
+          throw new NodeOperationError(node, `Unsupported operation: ${operationId}`);
         }
 
-        const pathParams = parseJsonObject(this.getNodeParameter('pathParamsJson', itemIndex), 'pathParamsJson', itemIndex);
-        const query = parseJsonObject(this.getNodeParameter('queryJson', itemIndex), 'queryJson', itemIndex);
-        const body = parseJsonObject(this.getNodeParameter('bodyJson', itemIndex), 'bodyJson', itemIndex);
+        const pathParams = parseJsonObject(this.getNodeParameter('pathParamsJson', itemIndex), 'pathParamsJson', itemIndex, node);
+        const query = parseJsonObject(this.getNodeParameter('queryJson', itemIndex), 'queryJson', itemIndex, node);
+        const body = parseJsonObject(this.getNodeParameter('bodyJson', itemIndex), 'bodyJson', itemIndex, node);
 
-        const path = interpolatePath(operation.path, pathParams);
+        const path = interpolatePath(operation.path, pathParams, node);
 
         const options: IHttpRequestOptions = {
           method: operation.method,
@@ -131,7 +134,7 @@ export class Reepl implements INodeType {
           continue;
         }
 
-        throw new NodeOperationError(this.getNode(), error as Error, { itemIndex });
+        throw new NodeOperationError(node, error as Error, { itemIndex });
       }
     }
 

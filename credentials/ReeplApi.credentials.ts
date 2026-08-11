@@ -2,6 +2,7 @@ import type {
   IAuthenticateGeneric,
   ICredentialTestRequest,
   ICredentialType,
+  Icon,
   INodeProperties,
 } from 'n8n-workflow';
 
@@ -9,6 +10,11 @@ export class ReeplApi implements ICredentialType {
   name = 'reeplApi';
 
   displayName = 'Reepl API';
+
+  icon: Icon = {
+    light: 'file:../nodes/Reepl/reepl.svg',
+    dark: 'file:../nodes/Reepl/reepl.dark.svg',
+  };
 
   documentationUrl = 'https://developers.reepl.io';
 

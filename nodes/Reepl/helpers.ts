@@ -1,4 +1,5 @@
-import type { IDataObject } from 'n8n-workflow';
+import type { IDataObject, INode } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
 
 export const REEPL_API_DEFAULT_BASE_URL = 'https://api.reepl.io/v1';
 
@@ -25,7 +26,7 @@ export function getBaseUrl(credentials: IDataObject): string {
   return configuredBaseUrl.replace(/\/+$/, '');
 }
 
-export function parseJsonObject(value: unknown, parameterName: string, itemIndex?: number): IDataObject {
+export function parseJsonObject(value: unknown, parameterName: string, itemIndex: number | undefined, node: INode): IDataObject {
   if (value === undefined || value === null || value === '') {
     return {};
   }
@@ -35,27 +36,27 @@ export function parseJsonObject(value: unknown, parameterName: string, itemIndex
   }
 
   if (typeof value !== 'string') {
-    throw new Error(`Expected ${parameterName} to be a JSON object${itemIndex === undefined ? '' : ` on item ${itemIndex}`}`);
+    throw new NodeOperationError(node, `Expected ${parameterName} to be a JSON object${itemIndex === undefined ? '' : ` on item ${itemIndex}`}`);
   }
 
   try {
     const parsed = JSON.parse(value) as unknown;
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      throw new Error('value must be a JSON object');
+      throw new NodeOperationError(node, 'value must be a JSON object');
     }
     return parsed as IDataObject;
   } catch (error) {
-    throw new Error(`Invalid JSON for ${parameterName}${itemIndex === undefined ? '' : ` on item ${itemIndex}`}: ${(error as Error).message}`);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new NodeOperationError(node, `Invalid JSON for ${parameterName}${itemIndex === undefined ? '' : ` on item ${itemIndex}`}: ${message}`);
   }
 }
 
-export function interpolatePath(pathTemplate: string, pathParams: IDataObject): string {
+export function interpolatePath(pathTemplate: string, pathParams: IDataObject, node: INode): string {
   return pathTemplate.replace(/\{([^}]+)\}/g, (_, key: string) => {
     const rawValue = pathParams[key];
     if (rawValue === undefined || rawValue === null || rawValue === '') {
-      throw new Error(`Missing path parameter: ${key}`);
+      throw new NodeOperationError(node, `Missing path parameter: ${key}`);
     }
     return encodeURIComponent(String(rawValue));
   });
 }
-

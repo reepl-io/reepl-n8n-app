@@ -8,6 +8,7 @@ import type {
   INodeTypeDescription,
   IWebhookResponseData,
 } from 'n8n-workflow';
+import { NodeConnectionTypes } from 'n8n-workflow';
 import { getBaseUrl, REEPL_TRIGGER_EVENTS } from './helpers';
 
 type WebhookSubscription = {
@@ -80,7 +81,10 @@ export class ReeplTrigger implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Reepl Trigger',
     name: 'reeplTrigger',
-    icon: 'file:reepl.svg',
+    icon: {
+      light: 'file:reepl.svg',
+      dark: 'file:reepl.dark.svg',
+    },
     group: ['trigger'],
     version: 1,
     subtitle: '={{$parameter["eventType"]}}',
@@ -88,8 +92,9 @@ export class ReeplTrigger implements INodeType {
     defaults: {
       name: 'Reepl Trigger',
     },
+    usableAsTool: true,
     inputs: [],
-    outputs: ['main'],
+    outputs: [NodeConnectionTypes.Main],
     credentials: [
       {
         name: 'reeplApi',
