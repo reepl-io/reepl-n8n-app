@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-reepl",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Reepl nodes for n8n: LinkedIn content actions and webhook triggers",
   "license": "MIT",
   "homepage": "https://help.reepl.io/integrations/n8n",
