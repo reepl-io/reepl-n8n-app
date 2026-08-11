@@ -1,4 +1,9 @@
-import type { ICredentialType, INodeProperties } from 'n8n-workflow';
+import type {
+  IAuthenticateGeneric,
+  ICredentialTestRequest,
+  ICredentialType,
+  INodeProperties,
+} from 'n8n-workflow';
 
 export class ReeplApi implements ICredentialType {
   name = 'reeplApi';
@@ -28,7 +33,7 @@ export class ReeplApi implements ICredentialType {
     },
   ];
 
-  authenticate = {
+  authenticate: IAuthenticateGeneric = {
     type: 'generic' as const,
     properties: {
       headers: {
@@ -37,7 +42,7 @@ export class ReeplApi implements ICredentialType {
     },
   };
 
-  test = {
+  test: ICredentialTestRequest = {
     request: {
       baseURL: '={{$credentials.baseUrl}}',
       url: '/external/me',

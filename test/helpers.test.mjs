@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { interpolatePath, parseJsonObject, getBaseUrl } from '../dist/nodes/Reepl/helpers.js';
+import { ReeplApi } from '../dist/credentials/ReeplApi.credentials.js';
+
+test('Reepl API credentials include a connection test request', () => {
+  const credential = new ReeplApi();
+
+  assert.equal(credential.test.request.method, 'GET');
+  assert.equal(credential.test.request.url, '/external/me');
+});
 
 test('parseJsonObject accepts n8n JSON values and JSON strings', () => {
   assert.deepEqual(parseJsonObject({ content: 'hello' }, 'body'), { content: 'hello' });
