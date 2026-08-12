@@ -92,7 +92,6 @@ export class ReeplTrigger implements INodeType {
     defaults: {
       name: 'Reepl Trigger',
     },
-    usableAsTool: true,
     inputs: [],
     outputs: [NodeConnectionTypes.Main],
     credentials: [
